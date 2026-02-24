@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Success - Vibestore</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="text-align: center; padding: 50px 20px; background: #f4f4f4; font-family: sans-serif;">
+
+    <div style="background: white; max-width: 600px; margin: auto; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        
+        <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
+        
+        <h1 style="color: #28a745; margin-bottom: 10px;">Order Placed Successfully!</h1>
+        <p style="color: #666;">Thank you for shopping with <strong>Vibestore</strong>. Your style is on the way!</p>
+        
+        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+        
+        <div id="order-info" style="text-align: left; background: #f9f9f9; padding: 20px; border-radius: 8px; line-height: 1.6;">
+            </div>
+        
+        <br>
+        <button onclick="goHome()" style="padding: 15px 30px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%;">
+            Continue Shopping
+        </button>
+    </div>
+
+    <script>
+       
+        const lastOrder = JSON.parse(localStorage.getItem('lastOrder'));
+        
+        if(lastOrder) {
+            
+            const orderId = "VIBE-" + Math.floor(100000 + Math.random() * 900000);
+            
+           
+            const itemNames = lastOrder.items.map(item => item.name).join(", ");
+            
+            
+            let totalBill = 0;
+            lastOrder.items.forEach(item => {
+                totalBill += (item.price * (item.quantity || 1));
+            });
+
+            document.getElementById('order-info').innerHTML = `
+                <h3 style="margin-top:0; color:#333;">Order Summary</h3>
+                <p><strong>Order ID:</strong> <span style="color:#28a745;">#${orderId}</span></p>
+                <p><strong>Customer:</strong> ${lastOrder.customerName}</p>
+                <p><strong>Phone:</strong> ${lastOrder.customerPhone}</p>
+                <p><strong>Address:</strong> ${lastOrder.deliveryAddress}</p>
+                <hr style="border-top: 1px dashed #ccc;">
+                <p><strong>Items:</strong> ${itemNames}</p>
+                <p style="font-size: 18px; margin-top: 10px;"><strong>Total Paid:</strong> ₹${totalBill}</p>
+            `;
+        } else {
+           
+            document.body.innerHTML = "<h1>No order found!</h1><a href='index.html'>Go back to shop</a>";
+        }
+
+        function goHome() {
+            
+            localStorage.removeItem('myCart'); 
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
