@@ -17,6 +17,28 @@ const products = [
 ];
 
 
+function checkAuthStatus() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    if (isLoggedIn) {
+        if(loginBtn) loginBtn.style.display = 'none';
+        if(logoutBtn) logoutBtn.style.display = 'block';
+    } else {
+        if(loginBtn) loginBtn.style.display = 'block';
+        if(logoutBtn) logoutBtn.style.display = 'none';
+    }
+}
+
+
+function logoutUser() {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('currentUser');
+    alert("Logged out successfully!");
+    window.location.href = "login.html"; 
+}
+
 function loadProducts(data = products) {
     const container = document.getElementById('product-container');
     if(!container) return;
@@ -29,17 +51,17 @@ function loadProducts(data = products) {
         if(filtered.length > 0) {
             let section = `
                 <div style="width:100%; margin-bottom:30px; clear:both; display:inline-block;">
-                    <h2 style="border-bottom:2px solid #000; padding:10px; font-family:sans-serif;">${cat}</h2>
-                    <div style="display:flex; flex-wrap:wrap;">
+                    <h2 style="border-bottom:2px solid #000; padding:10px; font-family:sans-serif; text-align:left;">${cat}</h2>
+                    <div style="display:flex; flex-wrap:wrap; justify-content:center;">
             `;
 
             filtered.forEach(p => {
                 section += `
-                    <div style="width:220px; margin:10px; border:1px solid #ddd; padding:10px; background:#fff; text-align:center; border-radius:8px;">
-                        <img src="${p.img}" alt="${p.name}" style="width:100%; height:250px; object-fit:cover; border-radius:5px;">
-                        <h4 style="margin:10px 0;">${p.name}</h4>
-                        <p style="font-weight:bold;">₹${p.price}</p>
-                        <button onclick="addToCart(${p.id})" style="width:100%; padding:8px; background:#000; color:#fff; border:none; cursor:pointer; border-radius:4px;">Add to Cart</button>
+                    <div style="width:250px; margin:15px; border:1px solid #ddd; padding:15px; background:#fff; text-align:center; border-radius:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <img src="${p.img}" alt="${p.name}" style="width:100%; height:250px; object-fit:cover; border-radius:8px;">
+                        <h4 style="margin:15px 0 5px 0; color:#333;">${p.name}</h4>
+                        <p style="font-weight:bold; color:#000; font-size:1.1rem;">₹${p.price}</p>
+                        <button onclick="addToCart(${p.id})" style="width:100%; padding:10px; background:#000; color:#fff; border:none; cursor:pointer; border-radius:6px; font-weight:bold;">Add to Cart</button>
                     </div>
                 `;
             });
@@ -49,25 +71,51 @@ function loadProducts(data = products) {
     });
 }
 
-
-const searchInput = document.getElementById('search-input');
-if(searchInput) {
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const filteredResults = products.filter(p => 
-            p.name.toLowerCase().includes(searchTerm) || 
-            p.category.toLowerCase().includes(searchTerm)
-        );
-        loadProducts(filteredResults); 
-    });
+function handleSearch() {
+    const searchInput = document.getElementById('search-input');
+    const query = searchInput.value.toLowerCase().trim();
+    
+   
+    const filteredResults = products.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        p.category.toLowerCase().includes(query)
+    );
+    
+    loadProducts(filteredResults);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const sInput = document.getElementById('search-input');
+    
+    if (sInput) {
+       
+        sInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+
+        sInput.addEventListener('input', handleSearch);
+    }
+});
+
 
 function addToCart(id) {
     let cart = JSON.parse(localStorage.getItem('myCart')) || [];
     const item = products.find(p => p.id === id);
-    cart.push({...item, quantity: 1});
+    
+    const existingItem = cart.find(c => c.id === id);
+    if(existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({...item, quantity: 1});
+    }
     localStorage.setItem('myCart', JSON.stringify(cart));
-    alert(item.name + " Added!");
+    alert(item.name + " Added to Cart!");
 }
 
-window.onload = () => loadProducts();
+
+window.onload = () => {
+    checkAuthStatus();
+    loadProducts();
+};
